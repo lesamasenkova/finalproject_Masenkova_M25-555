@@ -8,7 +8,7 @@ from datetime import datetime
 from valutatrade_hub.logging_config import get_logger
 from valutatrade_hub.decorators import log_action, catch_and_log
 from valutatrade_hub.core.models import User, Portfolio, Wallet
-from valuatatrade_hub.core.utils import (
+from valutatrade_hub.core.utils import (
     validate_amount,
     validate_currency_code,
     calculate_conversion_details,

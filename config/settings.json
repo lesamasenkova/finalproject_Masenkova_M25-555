@@ -1,0 +1,27 @@
+{
+  "app": {
+    "name": "ValutaTrade Hub",
+    "version": "0.1.0",
+    "environment": "development"
+  },
+  "database": {
+    "users_file": "data/users.json",
+    "portfolios_file": "data/portfolios.json",
+    "rates_file": "data/exchange_rates.json"
+  },
+  "api": {
+    "default_timeout": 10,
+    "max_retries": 3,
+    "retry_delay": 1.0
+  },
+  "logging": {
+    "level": "INFO",
+    "console_level": "INFO",
+    "file_level": "DEBUG"
+  },
+  "features": {
+    "enable_api": true,
+    "enable_parser": true,
+    "cache_rates": true
+  }
+}

@@ -9,12 +9,14 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.10"
 prettytable = "^1.0"
 requests = "^2.31"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.6"
+pytest = "^9.0.1"
+pytest-cov = "^7.0.0"
 
 [tool.poetry.scripts]
 project = "main:main"

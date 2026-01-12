@@ -1,0 +1,26 @@
+2026-01-13 01:17:11,188 - valutatrade_hub.parser_service.updater - INFO - ============================================================
+2026-01-13 01:17:11,188 - valutatrade_hub.parser_service.updater - INFO - Starting rates update...
+2026-01-13 01:17:11,188 - valutatrade_hub.parser_service.updater - INFO - ============================================================
+2026-01-13 01:17:11,188 - valutatrade_hub.parser_service.updater - INFO - Fetching from CoinGeckoClient...
+2026-01-13 01:17:11,189 - valutatrade_hub.parser_service.api_clients - INFO - Fetching crypto rates from CoinGecko...
+2026-01-13 01:17:11,587 - valutatrade_hub.parser_service.api_clients - INFO - Successfully fetched 6 crypto rates
+2026-01-13 01:17:11,588 - valutatrade_hub.parser_service.updater - INFO - ✓ CoinGeckoClient: OK (6 rates)
+2026-01-13 01:17:11,588 - valutatrade_hub.parser_service.updater - INFO - Fetching from ExchangeRateApiClient...
+2026-01-13 01:17:11,588 - valutatrade_hub.parser_service.api_clients - INFO - Fetching fiat rates from ExchangeRate-API...
+2026-01-13 01:17:11,812 - valutatrade_hub.parser_service.api_clients - INFO - Successfully fetched 5 fiat rates
+2026-01-13 01:17:11,814 - valutatrade_hub.parser_service.updater - INFO - ✓ ExchangeRateApiClient: OK (5 rates)
+2026-01-13 01:17:11,814 - valutatrade_hub.parser_service.updater - INFO - Writing 11 rates to storage...
+2026-01-13 01:17:11,815 - valutatrade_hub.parser_service.storage - INFO - Saved 11 rates to data/rates.json
+2026-01-13 01:17:11,815 - valutatrade_hub.parser_service.storage - INFO - Appended 11 records to history (total: 11)
+2026-01-13 01:17:11,815 - valutatrade_hub.parser_service.updater - INFO - ✓ Successfully saved to storage
+2026-01-13 01:17:11,815 - valutatrade_hub.parser_service.updater - INFO - ============================================================
+2026-01-13 01:17:11,816 - valutatrade_hub.parser_service.updater - INFO - Update completed successfully
+2026-01-13 01:17:11,816 - valutatrade_hub.parser_service.updater - INFO - ============================================================
+2026-01-13 01:17:17,364 - valutatrade_hub.decorators - INFO - REGISTER user='bob' result=OK
+2026-01-13 01:17:22,384 - valutatrade_hub.decorators - INFO - LOGIN user='bob' result=OK
+2026-01-13 01:17:29,259 - valutatrade_hub.decorators - INFO - BUY result=OK
+2026-01-13 01:17:35,435 - valutatrade_hub.decorators - INFO - BUY result=OK
+2026-01-13 01:18:01,288 - valutatrade_hub.decorators - INFO - SELL result=OK
+2026-01-13 01:18:22,626 - valutatrade_hub.decorators - INFO - REGISTER user='alice' result=OK
+2026-01-13 01:18:30,933 - valutatrade_hub.decorators - INFO - LOGIN user='alice' result=OK
+2026-01-13 01:18:36,840 - valutatrade_hub.decorators - INFO - BUY result=OK

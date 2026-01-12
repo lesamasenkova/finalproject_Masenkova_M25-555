@@ -133,15 +133,11 @@ class PortfolioService:
         portfolio = find_portfolio_by_user_id(user.user_id)
 
         if not portfolio:
-            return False, "Портфель не найден"
+            return True, f"Портфель пользователя '{user.username}' пуст.\nИспользуйте команду 'buy' для покупки валюты."
 
         wallets = portfolio.wallets
         if not wallets:
             return True, f"Портфель пользователя '{user.username}' пуст"
-
-        # Загружаем курсы
-        db = DatabaseManager()
-        
 
         # Формируем вывод
         output = [f"Портфель пользователя '{user.username}' (база: {base_currency}):"]
@@ -149,7 +145,6 @@ class PortfolioService:
 
         for currency_code, wallet in wallets.items():
             balance = wallet.balance
-
             try:
                 if currency_code == base_currency:
                     value_in_base = balance
@@ -161,19 +156,17 @@ class PortfolioService:
                         value_in_base = balance * rate
                     else:
                         output.append(
-                            f"- {currency_code}: {balance:.4f}  → курс недоступен"
+                            f"- {currency_code}: {balance:.4f} → курс недоступен"
                         )
                         continue
 
                 total += value_in_base
-
                 # Получаем информацию о валюте
-                
                 output.append(
-                    f"- {currency_code}: {balance:.4f}  → {value_in_base:.2f} {base_currency}"
+                    f"- {currency_code}: {balance:.4f} → {value_in_base:.2f} {base_currency}"
                 )
             except CurrencyNotFoundError:
-                output.append(f"- {currency_code}: {balance:.4f}  → неизвестная валюта")
+                output.append(f"- {currency_code}: {balance:.4f} → неизвестная валюта")
 
         output.append("---------------------------------")
         output.append(f"ИТОГО: {total:,.2f} {base_currency}")
@@ -207,15 +200,17 @@ class PortfolioService:
             user = AuthService.get_current_user()
             db = DatabaseManager()
             portfolios = db.load_portfolios()
-            portfolio = None
 
+            portfolio = None
             for p in portfolios:
                 if p.user_id == user.user_id:
                     portfolio = p
                     break
 
+            # Создаем портфель, если его нет
             if not portfolio:
-                return False, "Портфель не найден"
+                portfolio = Portfolio(user.user_id)
+                portfolios.append(portfolio)
 
             # Получаем информацию о валюте
             currency_obj = get_currency(currency)
@@ -302,19 +297,18 @@ class PortfolioService:
             user = AuthService.get_current_user()
             db = DatabaseManager()
             portfolios = db.load_portfolios()
-            portfolio = None
 
+            portfolio = None
             for p in portfolios:
                 if p.user_id == user.user_id:
                     portfolio = p
                     break
 
             if not portfolio:
-                return False, "Портфель не найден"
+                return False, "Портфель пуст. Сначала купите валюту командой 'buy --currency BTC --amount 0.001'"
 
             # Получаем информацию о валюте
             currency_obj = get_currency(currency)
-
             wallet = portfolio.get_wallet(currency)
 
             if not wallet:
@@ -400,7 +394,6 @@ class RatesService:
             )
 
             reverse_rate = 1.0 / rate if rate != 0 else 0
-
             output = [
                 f"Из: {from_curr_obj.get_display_info()}",
                 f"В: {to_curr_obj.get_display_info()}",
@@ -423,3 +416,4 @@ class RatesService:
                 False,
                 f"{str(e)}\n\nПовторите попытку позже или выполните 'update-rates'",
             )
+

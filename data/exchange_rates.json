@@ -1,1 +1,90 @@
-[]
+[
+  {
+    "id": "BTC_USD_2026-01-12T22:17:11.815565Z",
+    "from_currency": "BTC",
+    "to_currency": "USD",
+    "rate": 91237,
+    "timestamp": "2026-01-12T22:17:11.815565Z",
+    "source": "CoinGecko"
+  },
+  {
+    "id": "ETH_USD_2026-01-12T22:17:11.815565Z",
+    "from_currency": "ETH",
+    "to_currency": "USD",
+    "rate": 3098.99,
+    "timestamp": "2026-01-12T22:17:11.815565Z",
+    "source": "CoinGecko"
+  },
+  {
+    "id": "SOL_USD_2026-01-12T22:17:11.815565Z",
+    "from_currency": "SOL",
+    "to_currency": "USD",
+    "rate": 139.26,
+    "timestamp": "2026-01-12T22:17:11.815565Z",
+    "source": "CoinGecko"
+  },
+  {
+    "id": "USDT_USD_2026-01-12T22:17:11.815565Z",
+    "from_currency": "USDT",
+    "to_currency": "USD",
+    "rate": 0.999102,
+    "timestamp": "2026-01-12T22:17:11.815565Z",
+    "source": "CoinGecko"
+  },
+  {
+    "id": "BNB_USD_2026-01-12T22:17:11.815565Z",
+    "from_currency": "BNB",
+    "to_currency": "USD",
+    "rate": 903.57,
+    "timestamp": "2026-01-12T22:17:11.815565Z",
+    "source": "CoinGecko"
+  },
+  {
+    "id": "XRP_USD_2026-01-12T22:17:11.815565Z",
+    "from_currency": "XRP",
+    "to_currency": "USD",
+    "rate": 2.05,
+    "timestamp": "2026-01-12T22:17:11.815565Z",
+    "source": "CoinGecko"
+  },
+  {
+    "id": "EUR_USD_2026-01-12T22:17:11.815565Z",
+    "from_currency": "EUR",
+    "to_currency": "USD",
+    "rate": 1.1631964638827497,
+    "timestamp": "2026-01-12T22:17:11.815565Z",
+    "source": "ExchangeRate-API"
+  },
+  {
+    "id": "GBP_USD_2026-01-12T22:17:11.815565Z",
+    "from_currency": "GBP",
+    "to_currency": "USD",
+    "rate": 1.3401232913428036,
+    "timestamp": "2026-01-12T22:17:11.815565Z",
+    "source": "ExchangeRate-API"
+  },
+  {
+    "id": "RUB_USD_2026-01-12T22:17:11.815565Z",
+    "from_currency": "RUB",
+    "to_currency": "USD",
+    "rate": 0.012654415505202231,
+    "timestamp": "2026-01-12T22:17:11.815565Z",
+    "source": "ExchangeRate-API"
+  },
+  {
+    "id": "JPY_USD_2026-01-12T22:17:11.815565Z",
+    "from_currency": "JPY",
+    "to_currency": "USD",
+    "rate": 0.006327956468721861,
+    "timestamp": "2026-01-12T22:17:11.815565Z",
+    "source": "ExchangeRate-API"
+  },
+  {
+    "id": "CNY_USD_2026-01-12T22:17:11.815565Z",
+    "from_currency": "CNY",
+    "to_currency": "USD",
+    "rate": 0.14310450922308562,
+    "timestamp": "2026-01-12T22:17:11.815565Z",
+    "source": "ExchangeRate-API"
+  }
+]

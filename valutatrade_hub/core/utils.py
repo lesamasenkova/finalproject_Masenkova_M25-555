@@ -92,16 +92,15 @@ def validate_currency_code(code: str) -> str:
         CurrencyNotFoundError: Если валюта не поддерживается
     """
     code = code.upper().strip()
-
     if not is_currency_supported(code):
         raise CurrencyNotFoundError(code)
-
     return code
 
 
 def get_exchange_rate(from_currency: str, to_currency: str) -> Optional[float]:
     """
-    Получить курс обмена валют.
+    Получить курс обмена валют из кеша.
+    Поддерживает кросс-курсы через USD.
 
     Args:
         from_currency: Исходная валюта
@@ -122,19 +121,54 @@ def get_exchange_rate(from_currency: str, to_currency: str) -> Optional[float]:
         return 1.0
 
     db = DatabaseManager()
-    rates = db.load_rates()
-    rate_key = f"{from_currency}_{to_currency}"
+    rates_data = db.load_rates()
 
-    # Прямой курс
-    if rate_key in rates and isinstance(rates[rate_key], dict):
-        return rates[rate_key].get("rate")
+    # Проверяем структуру
+    if not rates_data or not isinstance(rates_data, dict):
+        return None
 
-    # Обратный курс
-    reverse_key = f"{to_currency}_{from_currency}"
-    if reverse_key in rates and isinstance(rates[reverse_key], dict):
-        reverse_rate = rates[reverse_key].get("rate")
-        if reverse_rate and reverse_rate != 0:
-            return 1.0 / reverse_rate
+    if "pairs" not in rates_data:
+        return None
+
+    pairs = rates_data["pairs"]
+    if not isinstance(pairs, dict):
+        return None
+
+    # Вспомогательная функция для извлечения курса
+    def get_direct_rate(from_c: str, to_c: str) -> Optional[float]:
+        rate_key = f"{from_c}_{to_c}"
+        # Прямой курс
+        if rate_key in pairs:
+            pair_data = pairs[rate_key]
+            if isinstance(pair_data, dict) and "rate" in pair_data:
+                rate = pair_data["rate"]
+                if isinstance(rate, (int, float)) and rate > 0:
+                    return float(rate)
+
+        # Обратный курс
+        reverse_key = f"{to_c}_{from_c}"
+        if reverse_key in pairs:
+            pair_data = pairs[reverse_key]
+            if isinstance(pair_data, dict) and "rate" in pair_data:
+                reverse_rate = pair_data["rate"]
+                if isinstance(reverse_rate, (int, float)) and reverse_rate > 0:
+                    return 1.0 / float(reverse_rate)
+
+        return None
+
+    # Пытаемся найти прямой курс
+    direct_rate = get_direct_rate(from_currency, to_currency)
+    if direct_rate is not None:
+        return direct_rate
+
+    # Если прямого курса нет, пытаемся найти кросс-курс через USD
+    if from_currency != "USD" and to_currency != "USD":
+        from_to_usd = get_direct_rate(from_currency, "USD")
+        to_to_usd = get_direct_rate(to_currency, "USD")
+
+        if from_to_usd is not None and to_to_usd is not None and to_to_usd > 0:
+            # Например: BTC→EUR = (BTC→USD) / (EUR→USD)
+            return from_to_usd / to_to_usd
 
     return None
 
@@ -177,23 +211,34 @@ def get_rate_with_ttl_check(from_currency: str, to_currency: str) -> tuple:
 
     Raises:
         CurrencyNotFoundError: Если валюта не найдена
-        ApiRequestError: Если кеш устарел и не удалось обновить
+        ApiRequestError: Если курс недоступен
     """
     rate = get_exchange_rate(from_currency, to_currency)
-
     if rate is None:
         raise ApiRequestError(f"Курс {from_currency}→{to_currency} недоступен")
 
     db = DatabaseManager()
-    rates = db.load_rates()
-    rate_key = f"{from_currency}_{to_currency}"
+    rates_data = db.load_rates()
 
+    rate_key = f"{from_currency}_{to_currency}"
+    reverse_key = f"{to_currency}_{from_currency}"
     updated_at = "неизвестно"
-    if rate_key in rates and isinstance(rates[rate_key], dict):
-        updated_at = rates[rate_key].get("updated_at", "неизвестно")
+
+    if "pairs" in rates_data:
+        pairs = rates_data["pairs"]
+        if rate_key in pairs and isinstance(pairs[rate_key], dict):
+            updated_at = pairs[rate_key].get("updated_at", "неизвестно")
+        elif reverse_key in pairs and isinstance(pairs[reverse_key], dict):
+            updated_at = pairs[reverse_key].get("updated_at", "неизвестно")
+        else:
+            # Для кросс-курсов берем время обновления USD
+            usd_key_from = f"{from_currency}_USD"
+            if usd_key_from in pairs and isinstance(pairs[usd_key_from], dict):
+                updated_at = pairs[usd_key_from].get("updated_at", "неизвестно")
 
     warning = None
     if not is_rates_cache_fresh():
-        warning = "⚠️  Курсы устарели. Рекомендуется выполнить 'update-rates'"
+        warning = "⚠️ Курсы устарели. Рекомендуется выполнить 'update-rates'"
 
     return rate, updated_at, warning
+

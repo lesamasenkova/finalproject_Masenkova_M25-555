@@ -1,0 +1,72 @@
+{
+  "fiat": [
+    {
+      "code": "USD",
+      "name": "US Dollar",
+      "issuing_country": "United States"
+    },
+    {
+      "code": "EUR",
+      "name": "Euro",
+      "issuing_country": "Eurozone"
+    },
+    {
+      "code": "GBP",
+      "name": "British Pound",
+      "issuing_country": "United Kingdom"
+    },
+    {
+      "code": "RUB",
+      "name": "Russian Ruble",
+      "issuing_country": "Russia"
+    },
+    {
+      "code": "JPY",
+      "name": "Japanese Yen",
+      "issuing_country": "Japan"
+    },
+    {
+      "code": "CNY",
+      "name": "Chinese Yuan",
+      "issuing_country": "China"
+    }
+  ],
+  "crypto": [
+    {
+      "code": "BTC",
+      "name": "Bitcoin",
+      "algorithm": "SHA-256",
+      "market_cap": 1120000000000.0
+    },
+    {
+      "code": "ETH",
+      "name": "Ethereum",
+      "algorithm": "Ethash",
+      "market_cap": 450000000000.0
+    },
+    {
+      "code": "USDT",
+      "name": "Tether",
+      "algorithm": "Omni",
+      "market_cap": 83000000000.0
+    },
+    {
+      "code": "BNB",
+      "name": "Binance Coin",
+      "algorithm": "BFT",
+      "market_cap": 72000000000.0
+    },
+    {
+      "code": "SOL",
+      "name": "Solana",
+      "algorithm": "PoH",
+      "market_cap": 51000000000.0
+    },
+    {
+      "code": "XRP",
+      "name": "Ripple",
+      "algorithm": "RPCA",
+      "market_cap": 28000000000.0
+    }
+  ]
+}

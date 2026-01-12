@@ -109,8 +109,11 @@ class DatabaseManager:
             }
             for u in users
         ]
-        self._save_json_atomic(filepath, users_data)  
-
+        with open(filepath, "w", encoding="utf-8") as f:  
+            json.dump(users_data, f, ensure_ascii=False, indent=2)
+            f.flush() 
+            os.fsync(f.fileno())
+            
     def load_portfolios(self) -> List[Portfolio]:
         """Загрузить портфели."""
         filepath = self._settings.get("portfolios_file")
@@ -142,7 +145,11 @@ class DatabaseManager:
         filepath = self._settings.get("portfolios_file")
         portfolios_data = [p.to_dict() for p in portfolios]
         self._save_json_atomic(filepath, portfolios_data)
-
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(portfolios_data, f, ensure_ascii=False, indent=2)
+            f.flush() 
+            os.fsync(f.fileno())  
+            
     def load_rates(self) -> dict:
         """Загрузить курсы валют."""
         filepath = self._settings.get("rates_file")

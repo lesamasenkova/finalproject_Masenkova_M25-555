@@ -5,6 +5,7 @@
 ## Описание
 
 ValutaTrade Hub — это инструмент для управления виртуальным портфелем валют с автоматическим обновлением курсов через внешние API (CoinGecko, ExchangeRate-API).
+Запись Asciinema: https://asciinema.org/a/bL7fa81UhvtrItRU
 
 ### Основные возможности
 

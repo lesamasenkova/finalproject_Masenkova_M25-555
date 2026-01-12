@@ -2,6 +2,7 @@
 
 import os
 from dataclasses import dataclass, field
+
 from dotenv import load_dotenv
 
 # Загружаем переменные окружения из .env
@@ -13,7 +14,9 @@ class ParserConfig:
     """Конфигурация для Parser Service."""
 
     # API ключи (из переменных окружения)
-    EXCHANGERATE_API_KEY: str = field(default_factory=lambda: os.getenv("EXCHANGERATE_API_KEY", ""))
+    EXCHANGERATE_API_KEY: str = field(
+        default_factory=lambda: os.getenv("EXCHANGERATE_API_KEY", "")
+    )
 
     # Эндпоинты
     COINGECKO_URL: str = "https://api.coingecko.com/api/v3/simple/price"
@@ -29,14 +32,16 @@ class ParserConfig:
     CRYPTO_CURRENCIES: tuple = ("BTC", "ETH", "SOL", "USDT", "BNB", "XRP")
 
     # Маппинг кодов криптовалют на ID CoinGecko
-    CRYPTO_ID_MAP: dict = field(default_factory=lambda: {
-        "BTC": "bitcoin",
-        "ETH": "ethereum",
-        "SOL": "solana",
-        "USDT": "tether",
-        "BNB": "binancecoin",
-        "XRP": "ripple",
-    })
+    CRYPTO_ID_MAP: dict = field(
+        default_factory=lambda: {
+            "BTC": "bitcoin",
+            "ETH": "ethereum",
+            "SOL": "solana",
+            "USDT": "tether",
+            "BNB": "binancecoin",
+            "XRP": "ripple",
+        }
+    )
 
     # Пути к файлам
     RATES_FILE_PATH: str = "data/rates.json"

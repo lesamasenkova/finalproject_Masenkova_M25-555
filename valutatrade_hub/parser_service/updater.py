@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional 
 
 from valutatrade_hub.core.exceptions import ApiRequestError
 from valutatrade_hub.parser_service.api_clients import BaseApiClient
@@ -17,7 +17,7 @@ class RatesUpdater:
     def __init__(self, clients: List[BaseApiClient], storage: RatesStorage):
         """
         Инициализация updater.
-        
+
         Args:
             clients: Список API клиентов
             storage: Хранилище данных
@@ -25,13 +25,13 @@ class RatesUpdater:
         self.clients = clients
         self.storage = storage
 
-    def run_update(self, source_filter: Optional[str] = None) -> Dict[str, any]:
+    def run_update(self, source_filter: Optional[str] = None) -> Dict[str, Any]: 
         """
         Запустить обновление курсов.
-        
+
         Args:
             source_filter: Фильтр по источнику ('coingecko', 'exchangerate' или None для всех)
-            
+
         Returns:
             Словарь со статистикой обновления
         """
@@ -49,9 +49,15 @@ class RatesUpdater:
 
             # Применяем фильтр по источнику
             if source_filter:
-                if source_filter.lower() == "coingecko" and "CoinGecko" not in client_name:
+                if (
+                    source_filter.lower() == "coingecko"
+                    and "CoinGecko" not in client_name
+                ):
                     continue
-                if source_filter.lower() == "exchangerate" and "ExchangeRate" not in client_name:
+                if (
+                    source_filter.lower() == "exchangerate"
+                    and "ExchangeRate" not in client_name
+                ):
                     continue
 
             try:
@@ -78,6 +84,7 @@ class RatesUpdater:
                 error_msg = f"✗ {client_name}: FAILED - {str(e)}"
                 logger.error(error_msg)
                 errors.append(error_msg)
+
             except Exception as e:
                 error_msg = f"✗ {client_name}: UNEXPECTED ERROR - {str(e)}"
                 logger.error(error_msg)

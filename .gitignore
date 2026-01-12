@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Виртуальные окружения
+venv/
+ENV/
+env/
+.venv/
+
+# Poetry
+poetry.lock
+
+# Логи
+logs/
+*.log
+
+# Данные
+data/users.json
+data/portfolios.json
+# data/rates.json - можно закоммитить для примера
+# data/exchange_rates.json
+
+# Секретные данные
+.env
+*.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+build/
+dist/
+*.egg-info/
+
+.env

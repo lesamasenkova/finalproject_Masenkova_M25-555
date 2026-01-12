@@ -21,8 +21,8 @@ class CLI:
             "sell": self.cmd_sell,
             "get-rate": self.cmd_get_rate,
             "list-currencies": self.cmd_list_currencies,
-            "update-rates": self.cmd_update_rates,      
-            "show-rates": self.cmd_show_rates,          
+            "update-rates": self.cmd_update_rates,
+            "show-rates": self.cmd_show_rates,
             "help": self.cmd_help,
             "exit": self.cmd_exit,
         }
@@ -155,16 +155,16 @@ class CLI:
     def cmd_list_currencies(self, args):
         """Показать список поддерживаемых валют."""
         from valutatrade_hub.core.currencies import get_currency
-        
+
         codes = get_all_currency_codes()
-        
+
         print("\nПоддерживаемые валюты:")
         print("=" * 70)
-        
+
         # Разделяем на фиат и крипто
         fiat = []
         crypto = []
-        
+
         for code in sorted(codes):
             currency = get_currency(code)
             info = currency.get_display_info()
@@ -172,16 +172,151 @@ class CLI:
                 fiat.append(info)
             else:
                 crypto.append(info)
-        
+
         print("\nФиатные валюты:")
         for info in fiat:
             print(f"  {info}")
-        
+
         print("\nКриптовалюты:")
         for info in crypto:
             print(f"  {info}")
-        
+
         print("=" * 70)
+
+    def cmd_update_rates(self, args):
+        """Команда обновления курсов валют."""
+        source = args.get("source")
+
+        print("INFO: Starting rates update...")
+
+        try:
+            from valutatrade_hub.parser_service.config import ParserConfig
+            from valutatrade_hub.parser_service.api_clients import (
+                CoinGeckoClient,
+                ExchangeRateApiClient,
+            )
+            from valutatrade_hub.parser_service.storage import RatesStorage
+            from valutatrade_hub.parser_service.updater import RatesUpdater
+
+            # Инициализация
+            config = ParserConfig()
+
+            # Валидация конфигурации
+            try:
+                config.validate()
+            except ValueError as e:
+                print(f"ERROR: {e}")
+                return
+
+            # Создаем клиенты
+            clients = [
+                CoinGeckoClient(config),
+                ExchangeRateApiClient(config),
+            ]
+
+            # Создаем storage
+            storage = RatesStorage(config.RATES_FILE_PATH, config.HISTORY_FILE_PATH)
+
+            # Создаем updater
+            updater = RatesUpdater(clients, storage)
+
+            # Запускаем обновление
+            result = updater.run_update(source_filter=source)
+
+            # Выводим результаты
+            if result["success"]:
+                crypto_count = sum(
+                    1 for s in result.get("successful_sources", []) if "CoinGecko" in s
+                )
+                fiat_count = sum(
+                    1
+                    for s in result.get("successful_sources", [])
+                    if "ExchangeRate" in s
+                )
+
+                if crypto_count > 0:
+                    print("INFO: Fetching from CoinGecko... OK")
+                if fiat_count > 0:
+                    print("INFO: Fetching from ExchangeRate-API... OK")
+
+                print(
+                    f"INFO: Writing {result['total_rates']} rates to data/rates.json..."
+                )
+                print(
+                    f"Update successful. Total rates updated: {result['total_rates']}. Last refresh: {result['timestamp']}"
+                )
+            else:
+                print("ERROR: Update failed")
+
+            # Выводим ошибки
+            if result["errors"]:
+                print("\nErrors encountered:")
+                for error in result["errors"]:
+                    print(f"  - {error}")
+                print(
+                    "\nUpdate completed with errors. Check logs/actions.log for details."
+                )
+
+        except Exception as e:
+            print(f"ERROR: {e}")
+            import traceback
+
+            traceback.print_exc()
+
+    def cmd_show_rates(self, args):
+        """Команда показа курсов из кеша."""
+        currency = args.get("currency")
+        top_str = args.get("top")
+
+        try:
+            from valutatrade_hub.infra.database import DatabaseManager
+
+            db = DatabaseManager()
+            rates_data = db.load_rates()
+
+            # Проверяем наличие данных
+            if not rates_data or "pairs" not in rates_data or not rates_data["pairs"]:
+                print(
+                    "Локальный кеш курсов пуст. Выполните 'update-rates', чтобы загрузить данные."
+                )
+                return
+
+            pairs = rates_data["pairs"]
+            last_refresh = rates_data.get("last_refresh", "неизвестно")
+
+            # Фильтрация по валюте
+            if currency:
+                currency = currency.upper()
+                filtered_pairs = {
+                    pair: info for pair, info in pairs.items() if currency in pair
+                }
+                if not filtered_pairs:
+                    print(f"Курс для '{currency}' не найден в кеше.")
+                    return
+                pairs = filtered_pairs
+
+            # Фильтрация по топ-N
+            if top_str:
+                try:
+                    top_n = int(top_str)
+                    # Сортируем по курсу (по убыванию) и берем топ-N
+                    sorted_pairs = sorted(
+                        pairs.items(), key=lambda x: x[1].get("rate", 0), reverse=True
+                    )
+                    pairs = dict(sorted_pairs[:top_n])
+                except ValueError:
+                    print("Ошибка: --top должен быть числом")
+                    return
+
+            # Вывод
+            print(f"\nRates from cache (updated at {last_refresh}):")
+            for pair, info in pairs.items():
+                rate = info.get("rate", 0)
+                source = info.get("source", "Unknown")
+                print(f"- {pair}: {rate:.8f} (source: {source})")
+
+        except Exception as e:
+            print(f"ERROR: {e}")
 
     def cmd_help(self, args):
         """Показать справку по командам."""
@@ -278,8 +413,7 @@ exit
 def main():
     """Точка входа для Poetry scripts."""
     # Инициализируем логирование
-    from valutatrade_hub import logging_config
-    
+
     cli = CLI()
     cli.run()
 
@@ -304,7 +438,7 @@ if __name__ == "__main__":
 
             # Инициализация
             config = ParserConfig()
-            
+
             # Валидация конфигурации
             try:
                 config.validate()
@@ -329,10 +463,18 @@ if __name__ == "__main__":
 
             # Выводим результаты
             if result["success"]:
-                print(f"INFO: Fetching from CoinGecko... OK ({len([p for p in result.get('successful_sources', []) if 'CoinGecko' in p])} sources)")
-                print(f"INFO: Fetching from ExchangeRate-API... OK ({len([p for p in result.get('successful_sources', []) if 'ExchangeRate' in p])} sources)")
-                print(f"INFO: Writing {result['total_rates']} rates to data/rates.json...")
-                print(f"Update successful. Total rates updated: {result['total_rates']}. Last refresh: {result['timestamp']}")
+                print(
+                    f"INFO: Fetching from CoinGecko... OK ({len([p for p in result.get('successful_sources', []) if 'CoinGecko' in p])} sources)"
+                )
+                print(
+                    f"INFO: Fetching from ExchangeRate-API... OK ({len([p for p in result.get('successful_sources', []) if 'ExchangeRate' in p])} sources)"
+                )
+                print(
+                    f"INFO: Writing {result['total_rates']} rates to data/rates.json..."
+                )
+                print(
+                    f"Update successful. Total rates updated: {result['total_rates']}. Last refresh: {result['timestamp']}"
+                )
             else:
                 print("ERROR: Update failed")
 
@@ -341,18 +483,20 @@ if __name__ == "__main__":
                 print("\nErrors encountered:")
                 for error in result["errors"]:
                     print(f"  - {error}")
-                print("\nUpdate completed with errors. Check logs/actions.log for details.")
+                print(
+                    "\nUpdate completed with errors. Check logs/actions.log for details."
+                )
 
         except Exception as e:
             print(f"ERROR: {e}")
             import traceback
+
             traceback.print_exc()
 
     def cmd_show_rates(self, args):
         """Команда показа курсов из кеша."""
         currency = args.get("currency")
         top_str = args.get("top")
-        base = args.get("base", "USD").upper()
 
         try:
             from valutatrade_hub.infra.database import DatabaseManager
@@ -362,7 +506,9 @@ if __name__ == "__main__":
 
             # Проверяем наличие данных
             if not rates_data or "pairs" not in rates_data or not rates_data["pairs"]:
-                print("Локальный кеш курсов пуст. Выполните 'update-rates', чтобы загрузить данные.")
+                print(
+                    "Локальный кеш курсов пуст. Выполните 'update-rates', чтобы загрузить данные."
+                )
                 return
 
             pairs = rates_data["pairs"]
@@ -372,9 +518,7 @@ if __name__ == "__main__":
             if currency:
                 currency = currency.upper()
                 filtered_pairs = {
-                    pair: info
-                    for pair, info in pairs.items()
-                    if currency in pair
+                    pair: info for pair, info in pairs.items() if currency in pair
                 }
                 if not filtered_pairs:
                     print(f"Курс для '{currency}' не найден в кеше.")
@@ -391,7 +535,7 @@ if __name__ == "__main__":
                     )
                     pairs = dict(sorted_pairs[:top_n])
                 except ValueError:
-                    print(f"Ошибка: --top должен быть числом")
+                    print("Ошибка: --top должен быть числом")
                     return
 
             # Вывод
@@ -403,4 +547,3 @@ if __name__ == "__main__":
 
         except Exception as e:
             print(f"ERROR: {e}")
-

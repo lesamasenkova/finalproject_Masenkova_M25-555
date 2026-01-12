@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Optional
 
-from valutatrade_hub.core.currencies import get_currency, is_currency_supported
+from valutatrade_hub.core.currencies import is_currency_supported
 from valutatrade_hub.core.exceptions import ApiRequestError, CurrencyNotFoundError
 from valutatrade_hub.core.models import Portfolio, User
 from valutatrade_hub.infra.database import DatabaseManager
@@ -13,10 +13,10 @@ from valutatrade_hub.infra.settings import SettingsLoader
 def find_user_by_username(username: str) -> Optional[User]:
     """
     Найти пользователя по имени.
-    
+
     Args:
         username: Имя пользователя
-        
+
     Returns:
         Объект User или None
     """
@@ -31,10 +31,10 @@ def find_user_by_username(username: str) -> Optional[User]:
 def find_user_by_id(user_id: int) -> Optional[User]:
     """
     Найти пользователя по ID.
-    
+
     Args:
         user_id: ID пользователя
-        
+
     Returns:
         Объект User или None
     """
@@ -49,7 +49,7 @@ def find_user_by_id(user_id: int) -> Optional[User]:
 def get_next_user_id() -> int:
     """
     Получить следующий свободный ID пользователя.
-    
+
     Returns:
         Новый ID (автоинкремент)
     """
@@ -63,10 +63,10 @@ def get_next_user_id() -> int:
 def find_portfolio_by_user_id(user_id: int) -> Optional[Portfolio]:
     """
     Найти портфель пользователя по ID.
-    
+
     Args:
         user_id: ID пользователя
-        
+
     Returns:
         Объект Portfolio или None
     """
@@ -81,35 +81,35 @@ def find_portfolio_by_user_id(user_id: int) -> Optional[Portfolio]:
 def validate_currency_code(code: str) -> str:
     """
     Валидировать код валюты.
-    
+
     Args:
         code: Код валюты
-        
+
     Returns:
         Нормализованный код (верхний регистр)
-        
+
     Raises:
         CurrencyNotFoundError: Если валюта не поддерживается
     """
     code = code.upper().strip()
-    
+
     if not is_currency_supported(code):
         raise CurrencyNotFoundError(code)
-    
+
     return code
 
 
 def get_exchange_rate(from_currency: str, to_currency: str) -> Optional[float]:
     """
     Получить курс обмена валют.
-    
+
     Args:
         from_currency: Исходная валюта
         to_currency: Целевая валюта
-        
+
     Returns:
         Курс обмена или None
-        
+
     Raises:
         CurrencyNotFoundError: Если валюта не найдена
     """
@@ -142,20 +142,20 @@ def get_exchange_rate(from_currency: str, to_currency: str) -> Optional[float]:
 def is_rates_cache_fresh() -> bool:
     """
     Проверить, свежий ли кеш курсов.
-    
+
     Returns:
         True если кеш свежий
     """
     settings = SettingsLoader()
     ttl_seconds = settings.get("rates_ttl_seconds", 300)
-    
+
     db = DatabaseManager()
     rates = db.load_rates()
-    
+
     last_refresh = rates.get("last_refresh")
     if not last_refresh:
         return False
-    
+
     try:
         last_refresh_dt = datetime.fromisoformat(last_refresh)
         age_seconds = (datetime.now() - last_refresh_dt).total_seconds()
@@ -167,34 +167,33 @@ def is_rates_cache_fresh() -> bool:
 def get_rate_with_ttl_check(from_currency: str, to_currency: str) -> tuple:
     """
     Получить курс с проверкой TTL.
-    
+
     Args:
         from_currency: Исходная валюта
         to_currency: Целевая валюта
-        
+
     Returns:
         Кортеж (курс, время_обновления, предупреждение)
-        
+
     Raises:
         CurrencyNotFoundError: Если валюта не найдена
         ApiRequestError: Если кеш устарел и не удалось обновить
     """
     rate = get_exchange_rate(from_currency, to_currency)
-    
+
     if rate is None:
         raise ApiRequestError(f"Курс {from_currency}→{to_currency} недоступен")
-    
+
     db = DatabaseManager()
     rates = db.load_rates()
     rate_key = f"{from_currency}_{to_currency}"
-    
+
     updated_at = "неизвестно"
     if rate_key in rates and isinstance(rates[rate_key], dict):
         updated_at = rates[rate_key].get("updated_at", "неизвестно")
-    
+
     warning = None
     if not is_rates_cache_fresh():
         warning = "⚠️  Курсы устарели. Рекомендуется выполнить 'update-rates'"
-    
-    return rate, updated_at, warning
 
+    return rate, updated_at, warning

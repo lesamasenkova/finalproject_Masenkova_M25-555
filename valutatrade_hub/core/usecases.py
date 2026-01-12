@@ -31,11 +31,11 @@ class AuthService:
     def register(cls, username: str, password: str) -> Tuple[bool, str]:
         """
         Зарегистрировать нового пользователя.
-        
+
         Args:
             username: Имя пользователя
             password: Пароль
-            
+
         Returns:
             Кортеж (успех, сообщение)
         """
@@ -60,7 +60,10 @@ class AuthService:
             portfolios.append(new_portfolio)
             db.save_portfolios(portfolios)
 
-            return True, f"Пользователь '{username}' зарегистрирован (id={user_id}). Войдите: login --username {username} --password ****"
+            return (
+                True,
+                f"Пользователь '{username}' зарегистрирован (id={user_id}). Войдите: login --username {username} --password ****",
+            )
         except ValidationError as e:
             return False, str(e)
 
@@ -69,11 +72,11 @@ class AuthService:
     def login(cls, username: str, password: str) -> Tuple[bool, str]:
         """
         Войти в систему.
-        
+
         Args:
             username: Имя пользователя
             password: Пароль
-            
+
         Returns:
             Кортеж (успех, сообщение)
         """
@@ -110,10 +113,10 @@ class PortfolioService:
     def show_portfolio(base_currency: str = "USD") -> Tuple[bool, str]:
         """
         Показать портфель текущего пользователя.
-        
+
         Args:
             base_currency: Базовая валюта для отображения
-            
+
         Returns:
             Кортеж (успех, сообщение)
         """
@@ -138,7 +141,7 @@ class PortfolioService:
 
         # Загружаем курсы
         db = DatabaseManager()
-        rates = db.load_rates()
+        
 
         # Формируем вывод
         output = [f"Портфель пользователя '{user.username}' (база: {base_currency}):"]
@@ -146,23 +149,26 @@ class PortfolioService:
 
         for currency_code, wallet in wallets.items():
             balance = wallet.balance
-            
+
             try:
                 if currency_code == base_currency:
                     value_in_base = balance
                 else:
                     from valutatrade_hub.core.utils import get_exchange_rate
+
                     rate = get_exchange_rate(currency_code, base_currency)
                     if rate:
                         value_in_base = balance * rate
                     else:
-                        output.append(f"- {currency_code}: {balance:.4f}  → курс недоступен")
+                        output.append(
+                            f"- {currency_code}: {balance:.4f}  → курс недоступен"
+                        )
                         continue
 
                 total += value_in_base
-                
+
                 # Получаем информацию о валюте
-                currency = get_currency(currency_code)
+                
                 output.append(
                     f"- {currency_code}: {balance:.4f}  → {value_in_base:.2f} {base_currency}"
                 )
@@ -179,11 +185,11 @@ class PortfolioService:
     def buy_currency(currency: str, amount: float) -> Tuple[bool, str]:
         """
         Купить валюту.
-        
+
         Args:
             currency: Код валюты
             amount: Количество
-            
+
         Returns:
             Кортеж (успех, сообщение)
         """
@@ -193,7 +199,7 @@ class PortfolioService:
         try:
             # Валидация валюты
             currency = validate_currency_code(currency)
-            
+
             # Валидация количества
             if not isinstance(amount, (int, float)) or amount <= 0:
                 raise ValidationError("'amount' должен быть положительным числом")
@@ -233,6 +239,7 @@ class PortfolioService:
             # Получаем курс для отчета
             try:
                 from valutatrade_hub.core.utils import get_exchange_rate
+
                 rate = get_exchange_rate(currency, "USD")
                 if rate:
                     cost = amount * rate
@@ -261,7 +268,10 @@ class PortfolioService:
             return True, "\n".join(output)
 
         except CurrencyNotFoundError as e:
-            return False, f"{str(e)}. Используйте команду 'help' для списка поддерживаемых валют."
+            return (
+                False,
+                f"{str(e)}. Используйте команду 'help' для списка поддерживаемых валют.",
+            )
         except ValidationError as e:
             return False, str(e)
 
@@ -270,11 +280,11 @@ class PortfolioService:
     def sell_currency(currency: str, amount: float) -> Tuple[bool, str]:
         """
         Продать валюту.
-        
+
         Args:
             currency: Код валюты
             amount: Количество
-            
+
         Returns:
             Кортеж (успех, сообщение)
         """
@@ -284,7 +294,7 @@ class PortfolioService:
         try:
             # Валидация валюты
             currency = validate_currency_code(currency)
-            
+
             # Валидация количества
             if not isinstance(amount, (int, float)) or amount <= 0:
                 raise ValidationError("'amount' должен быть положительным числом")
@@ -308,7 +318,10 @@ class PortfolioService:
             wallet = portfolio.get_wallet(currency)
 
             if not wallet:
-                return False, f"У вас нет кошелька '{currency}'. Добавьте валюту: она создаётся автоматически при первой покупке."
+                return (
+                    False,
+                    f"У вас нет кошелька '{currency}'. Добавьте валюту: она создаётся автоматически при первой покупке.",
+                )
 
             old_balance = wallet.balance
 
@@ -322,6 +335,7 @@ class PortfolioService:
             # Получаем курс для отчета
             try:
                 from valutatrade_hub.core.utils import get_exchange_rate
+
                 rate = get_exchange_rate(currency, "USD")
                 if rate:
                     revenue = amount * rate
@@ -350,7 +364,10 @@ class PortfolioService:
             return True, "\n".join(output)
 
         except CurrencyNotFoundError as e:
-            return False, f"{str(e)}. Используйте команду 'help' для списка поддерживаемых валют."
+            return (
+                False,
+                f"{str(e)}. Используйте команду 'help' для списка поддерживаемых валют.",
+            )
         except InsufficientFundsError as e:
             return False, str(e)
         except ValidationError as e:
@@ -364,11 +381,11 @@ class RatesService:
     def get_rate(from_currency: str, to_currency: str) -> Tuple[bool, str]:
         """
         Получить курс валюты.
-        
+
         Args:
             from_currency: Исходная валюта
             to_currency: Целевая валюта
-            
+
         Returns:
             Кортеж (успех, сообщение)
         """
@@ -376,12 +393,12 @@ class RatesService:
             # Валидация через get_currency
             from_curr_obj = get_currency(from_currency)
             to_curr_obj = get_currency(to_currency)
-            
+
             # Получаем курс с проверкой TTL
             rate, updated_at, warning = get_rate_with_ttl_check(
                 from_curr_obj.code, to_curr_obj.code
             )
-            
+
             reverse_rate = 1.0 / rate if rate != 0 else 0
 
             output = [
@@ -390,7 +407,7 @@ class RatesService:
                 f"Курс {from_curr_obj.code}→{to_curr_obj.code}: {rate:.8f} (обновлено: {updated_at})",
                 f"Обратный курс {to_curr_obj.code}→{from_curr_obj.code}: {reverse_rate:.8f}",
             ]
-            
+
             if warning:
                 output.append(warning)
 
@@ -398,8 +415,11 @@ class RatesService:
 
         except CurrencyNotFoundError as e:
             from valutatrade_hub.core.currencies import get_all_currency_codes
+
             supported = ", ".join(get_all_currency_codes())
             return False, f"{str(e)}\n\nПоддерживаемые валюты: {supported}"
         except ApiRequestError as e:
-            return False, f"{str(e)}\n\nПовторите попытку позже или выполните 'update-rates'"
-
+            return (
+                False,
+                f"{str(e)}\n\nПовторите попытку позже или выполните 'update-rates'",
+            )

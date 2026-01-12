@@ -3,5 +3,3 @@
 __version__ = "0.1.0"
 
 # Инициализация логирования при импорте
-from valutatrade_hub import logging_config
-

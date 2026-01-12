@@ -7,7 +7,7 @@ class InsufficientFundsError(Exception):
     def __init__(self, available: float, required: float, currency_code: str):
         """
         Инициализация исключения.
-        
+
         Args:
             available: Доступная сумма
             required: Требуемая сумма
@@ -29,7 +29,7 @@ class CurrencyNotFoundError(Exception):
     def __init__(self, currency_code: str):
         """
         Инициализация исключения.
-        
+
         Args:
             currency_code: Код неизвестной валюты
         """
@@ -44,7 +44,7 @@ class ApiRequestError(Exception):
     def __init__(self, reason: str):
         """
         Инициализация исключения.
-        
+
         Args:
             reason: Причина ошибки
         """
@@ -57,4 +57,3 @@ class ValidationError(Exception):
     """Исключение при ошибке валидации данных."""
 
     pass
-

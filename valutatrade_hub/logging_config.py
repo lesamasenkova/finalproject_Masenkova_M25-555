@@ -8,7 +8,7 @@ from logging.handlers import RotatingFileHandler
 def setup_logging(log_level=logging.INFO):
     """
     Настроить систему логирования.
-    
+
     Args:
         log_level: Уровень логирования (по умолчанию INFO)
     """
@@ -50,4 +50,3 @@ def setup_logging(log_level=logging.INFO):
 
 # Инициализируем логирование при импорте
 setup_logging()
-

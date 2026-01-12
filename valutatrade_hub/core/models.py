@@ -21,7 +21,7 @@ class User:
     ):
         """
         Инициализация пользователя.
-        
+
         Args:
             user_id: Уникальный идентификатор пользователя
             username: Имя пользователя
@@ -140,7 +140,7 @@ class Wallet:
     def withdraw(self, amount: float):
         """
         Снять средства с баланса.
-        
+
         Raises:
             InsufficientFundsError: Если недостаточно средств
         """
@@ -164,7 +164,7 @@ class Portfolio:
         """Инициализация портфеля."""
         self._user_id = user_id
         self._wallets = {}
-        
+
         if wallets:
             for currency_code, wallet_data in wallets.items():
                 if isinstance(wallet_data, Wallet):
@@ -221,4 +221,3 @@ class Portfolio:
         for currency_code, wallet in self._wallets.items():
             wallets_dict[currency_code] = {"balance": wallet.balance}
         return {"user_id": self._user_id, "wallets": wallets_dict}
-
